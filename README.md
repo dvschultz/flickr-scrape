@@ -30,7 +30,7 @@ To scrape for a particular search term:
 
 To scrape for an album/photoset:
 
-`python scraper.py --photoset PHOTOSETID
+`python scraper.py --photoset PHOTOSETID`
 
 Where PHOTOSETID is something like 72157629497519723
 
