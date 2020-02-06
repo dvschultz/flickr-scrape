@@ -28,6 +28,14 @@ To scrape for a particular search term:
 `python scraper.py --search "SEARCH TERM" --bbox "minimum_longitude minimum_latitude maximum_longitude maximum_latitude"`
 
 
+To scrape for an album/photoset:
+
+`python scraper.py --photoset PHOTOSETID
+
+Where PHOTOSETID is something like 72157629497519723
+
+You can obtain the photoset ID from the URL of the album e.g. https://www.flickr.com/photos/picksfromoutthere/albums/**72157629497519723**
+
 To scrape for a particular group:
 
 `python scraper.py --group "GROUP URL"`
