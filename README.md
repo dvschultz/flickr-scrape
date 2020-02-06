@@ -34,7 +34,7 @@ To scrape for an album/photoset:
 
 Where PHOTOSETID is something like 72157629497519723
 
-You can obtain the photoset ID from the URL of the album e.g. https://www.flickr.com/photos/picksfromoutthere/albums/**72157629497519723**
+You can obtain the photoset ID from the URL of the album e.g. flickr.com/photos/picksfromoutthere/albums/**72157629497519723**
 
 To scrape for a particular group:
 
