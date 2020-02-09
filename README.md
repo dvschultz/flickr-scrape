@@ -28,6 +28,14 @@ To scrape for a particular search term:
 `python scraper.py --search "SEARCH TERM" --bbox "minimum_longitude minimum_latitude maximum_longitude maximum_latitude"`
 
 
+To scrape for an album/photoset:
+
+`python scraper.py --photoset "PHOTOSETID"`
+
+Where PHOTOSETID is something like 72157629497519723
+
+You can obtain the photoset ID from the URL of the album e.g. flickr.com/photos/picksfromoutthere/albums/**72157629497519723**
+
 To scrape for a particular group:
 
 `python scraper.py --group "GROUP URL"`
@@ -40,4 +48,4 @@ You can also add a lat/lng coordinates to specify a geographic bounding box:
 
 Large-sized (1024px width) will be downloaded by default. You can download the original images by passing the flag `--original`.
 
-Limit the number of pages of results downloaded by passing `--max-pages N` where `N` is pages of 500 results each.
+Limit the number of pages of results downloaded by passing `--max-pages N` where `N` is pages of 500 results each.  Specify the start page with `--start-page M`.

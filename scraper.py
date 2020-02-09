@@ -58,49 +58,60 @@ def get_photos(qs, qg, page=1, original=False, bbox=None, sort='date-posted-asc'
     elif qg is not None:
         params['method'] = 'flickr.groups.pools.getPhotos',
         params['group_id'] = qg
+    elif qps is not None:
+        params['method'] = 'flickr.photosets.getPhotos',
+        params['photoset_id'] = qps
 
     # bbox should be: minimum_longitude, minimum_latitude, maximum_longitude, maximum_latitude
     if bbox is not None and len(bbox) == 4:
         params['bbox'] = ','.join(bbox)
 
     results = requests.get('https://api.flickr.com/services/rest', params=params).json()
-    if "photos" not in results:
-        print(results)
-        return None
-    return results["photos"]
 
+    if qps is not None:
+        if "photoset" not in results:
+            print(results)
+            return None
+        return results["photoset"]
+    else:
+        if "photos" not in results:
+            print(results)
+            return None
+        return results["photos"]
 
-def search(qs, qg, bbox=None, original=False, max_pages=None, sort='date-posted-asc'):
+def search(qs, qg, qps, bbox=None, original=False, max_pages=None,start_page=1, sort='date-posted-asc'):
     # create a folder for the query if it does not exist
-    foldername = os.path.join('images', re.sub(r'[\W]', '_', qs if qs is not None else "group_%s"%qg))
+    foldername = os.path.join('images', re.sub(r'[\W]', '_', qs if qs is not None else "set_%s"%qps if qps is not None else "group_%s"%qg))
+
     if bbox is not None:
         foldername += '_'.join(bbox)
 
     if not os.path.exists(foldername):
         os.makedirs(foldername)
 
-    jsonfilename = os.path.join(foldername, 'results.json')
+    jsonfilename = os.path.join(foldername, 'results' + str(start_page) + '.json')
 
     if not os.path.exists(jsonfilename):
 
         # save results as a json file
         photos = []
-        current_page = 1
-
+        current_page = start_page
         results = get_photos(qs, qg, page=current_page, original=original, bbox=bbox, sort=sort)
         if results is None:
+            with open(jsonfilename, 'w') as outfile:
+                json.dump(results, outfile)
             return
 
         total_pages = results['pages']
-        if max_pages is not None and total_pages > max_pages:
-            total_pages = max_pages
+        if max_pages is not None and total_pages > start_page + max_pages:
+            total_pages = start_page + max_pages
 
         photos += results['photo']
 
         while current_page < total_pages:
             print('downloading metadata, page {} of {}'.format(current_page, total_pages))
             current_page += 1
-            photos += get_photos(qs, qg, page=current_page, original=original, bbox=bbox)['photo']
+            photos += get_photos(qs, qg, qps, page=current_page, original=original, bbox=bbox)['photo']
             time.sleep(0.5)
 
         with open(jsonfilename, 'w') as outfile:
@@ -128,19 +139,22 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Download images from flickr')
     parser.add_argument('--search', '-s', dest='q_search', default=None, required=False, help='Search term')
     parser.add_argument('--group', '-g', dest='q_group', default=None, required=False, help='Group url, e.g. https://www.flickr.com/groups/scenery/')
+    parser.add_argument('--photoset', '-ps', dest='q_photoset', default=None, required=False, help='Set id, e.g. 120')
     parser.add_argument('--original', '-o', dest='original', action='store_true', default=False, required=False, help='Download original sized photos if True, large (1024px) otherwise')
     parser.add_argument('--max-pages', '-m', dest='max_pages', required=False, help='Max pages (default none)')
     parser.add_argument('--sort', '-so', dest='sort', required=False, help='date-posted-asc, date-posted-desc, date-taken-asc, date-taken-desc, interestingness-desc, interestingness-asc, and relevance')
+    parser.add_argument('--start-page', '-st', dest='start_page', required=False, help='Start page (default 1)')
     parser.add_argument('--bbox', '-b', dest='bbox', required=False, help='Bounding box to search in, separated by spaces like so: minimum_longitude minimum_latitude maximum_longitude maximum_latitude')
     args = parser.parse_args()
 
     qs = args.q_search
     qg = args.q_group
+    qps = args.q_photoset
     original = args.original
     sort = args.sort
 
-    if qs is None and qg is None:
-        sys.exit('Must specify a search term or group id')
+    if qs is None and qps is None and qg is None:
+        sys.exit('Must specify a search term, set id, or group id')
 
     try:
         bbox = args.bbox.split(' ')
@@ -153,7 +167,7 @@ if __name__ == '__main__':
     if qg is not None:
         qg = get_group_id_from_url(qg)
 
-    print('Searching for {}'.format(qs if qs is not None else "group %s"%qg))
+    print('Searching for {}'.format(qs if qs is not None else "set %s"%qps if qps is not None else "group %s"%qs))
     if bbox:
         print('Within', bbox)
 
@@ -161,5 +175,8 @@ if __name__ == '__main__':
     if args.max_pages:
         max_pages = int(args.max_pages)
 
-    search(qs, qg, bbox, original, max_pages, sort)
+    if args.start_page:
+        start_page = int(args.start_page)
+
+    search(qs, qg, qps, bbox, original, max_pages, start_page, sort)
 
