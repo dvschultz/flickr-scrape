@@ -38,7 +38,7 @@ def get_group_id_from_url(url):
     return results['group']['id']
 
 
-def get_photos(qs, qg, page=1, original=False, bbox=None):
+def get_photos(qs, qg, page=1, original=False, bbox=None, sort='date-posted-asc'):
     params = {
         'content_type': '7',
         'per_page': '500',
@@ -48,6 +48,7 @@ def get_photos(qs, qg, page=1, original=False, bbox=None):
         'nojsoncallback': 1,
         'extras': 'media,realname,%s,o_dims,geo,tags,machine_tags,date_taken' % ('url_o' if original else 'url_l'), #url_c,url_l,url_m,url_n,url_q,url_s,url_sq,url_t,url_z',
         'page': page,
+        'sort':sort,
         'api_key': KEY
     }
 
@@ -69,7 +70,7 @@ def get_photos(qs, qg, page=1, original=False, bbox=None):
     return results["photos"]
 
 
-def search(qs, qg, bbox=None, original=False, max_pages=None):
+def search(qs, qg, bbox=None, original=False, max_pages=None, sort='date-posted-asc'):
     # create a folder for the query if it does not exist
     foldername = os.path.join('images', re.sub(r'[\W]', '_', qs if qs is not None else "group_%s"%qg))
     if bbox is not None:
@@ -86,7 +87,7 @@ def search(qs, qg, bbox=None, original=False, max_pages=None):
         photos = []
         current_page = 1
 
-        results = get_photos(qs, qg, page=current_page, original=original, bbox=bbox)
+        results = get_photos(qs, qg, page=current_page, original=original, bbox=bbox, sort=sort)
         if results is None:
             return
 
@@ -129,12 +130,14 @@ if __name__ == '__main__':
     parser.add_argument('--group', '-g', dest='q_group', default=None, required=False, help='Group url, e.g. https://www.flickr.com/groups/scenery/')
     parser.add_argument('--original', '-o', dest='original', action='store_true', default=False, required=False, help='Download original sized photos if True, large (1024px) otherwise')
     parser.add_argument('--max-pages', '-m', dest='max_pages', required=False, help='Max pages (default none)')
+    parser.add_argument('--sort', '-so', dest='sort', required=False, help='date-posted-asc, date-posted-desc, date-taken-asc, date-taken-desc, interestingness-desc, interestingness-asc, and relevance')
     parser.add_argument('--bbox', '-b', dest='bbox', required=False, help='Bounding box to search in, separated by spaces like so: minimum_longitude minimum_latitude maximum_longitude maximum_latitude')
     args = parser.parse_args()
 
     qs = args.q_search
     qg = args.q_group
     original = args.original
+    sort = args.sort
 
     if qs is None and qg is None:
         sys.exit('Must specify a search term or group id')
@@ -158,5 +161,5 @@ if __name__ == '__main__':
     if args.max_pages:
         max_pages = int(args.max_pages)
 
-    search(qs, qg, bbox, original, max_pages)
+    search(qs, qg, bbox, original, max_pages, sort)
 
