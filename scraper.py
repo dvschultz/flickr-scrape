@@ -38,7 +38,7 @@ def get_group_id_from_url(url):
     return results['group']['id']
 
 
-def get_photos(qs, qg, page=1, original=False, bbox=None, sort='date-posted-asc'):
+def get_photos(qs, qg, qps, page=1, original=False, bbox=None, sort='date-posted-asc'):
     params = {
         'content_type': '7',
         'per_page': '500',
@@ -79,7 +79,7 @@ def get_photos(qs, qg, page=1, original=False, bbox=None, sort='date-posted-asc'
             return None
         return results["photos"]
 
-def search(qs, qg, qps, bbox=None, original=False, max_pages=None,start_page=1, sort='date-posted-asc'):
+def search(qs, qg, qps, bbox=None, original=False, max_pages=None, start_page=1, sort='date-posted-asc'):
     # create a folder for the query if it does not exist
     foldername = os.path.join('images', re.sub(r'[\W]', '_', qs if qs is not None else "set_%s"%qps if qps is not None else "group_%s"%qg))
 
@@ -96,7 +96,7 @@ def search(qs, qg, qps, bbox=None, original=False, max_pages=None,start_page=1, 
         # save results as a json file
         photos = []
         current_page = start_page
-        results = get_photos(qs, qg, page=current_page, original=original, bbox=bbox, sort=sort)
+        results = get_photos(qs, qg, qps, page=current_page, original=original, bbox=bbox, sort=sort)
         if results is None:
             with open(jsonfilename, 'w') as outfile:
                 json.dump(results, outfile)
@@ -111,6 +111,7 @@ def search(qs, qg, qps, bbox=None, original=False, max_pages=None,start_page=1, 
         while current_page < total_pages:
             print('downloading metadata, page {} of {}'.format(current_page, total_pages))
             current_page += 1
+            print(current_page)
             photos += get_photos(qs, qg, qps, page=current_page, original=original, bbox=bbox)['photo']
             time.sleep(0.5)
 
