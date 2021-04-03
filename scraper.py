@@ -50,7 +50,7 @@ def get_photos(qs, qg, qps, page=1, original=False, bbox=None, sort='date-posted
         'page': page,
         'sort':sort,
         'api_key': KEY,
-        'license': 1,2,3,4,5,6,7,8,9,10
+        'license': '1,2,3,4,5,6,7,8,9,10'
     }
 
     if qs is not None:
