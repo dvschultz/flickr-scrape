@@ -49,7 +49,8 @@ def get_photos(qs, qg, qps, page=1, original=False, bbox=None, sort='date-posted
         'extras': 'media,realname,%s,o_dims,geo,tags,machine_tags,date_taken' % ('url_o' if original else 'url_l'), #url_c,url_l,url_m,url_n,url_q,url_s,url_sq,url_t,url_z',
         'page': page,
         'sort':sort,
-        'api_key': KEY
+        'api_key': KEY,
+        'license': 1,2,3,4,5,6,7,8,9,10
     }
 
     if qs is not None:
